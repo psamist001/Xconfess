@@ -367,3 +367,8 @@ When adding a new API endpoint, follow the [API endpoint contributor checklist](
 - `xconfess-frontend/README.md`
 - `xconfess-contracts/README.md`
 - `docs/message-e2e-encryption.md` — E2E private messaging protocol
+
+## Handsoff notes
+
+<!-- handsoff-issue-35 -->
+- #35: [Advanced] Add a cohesive error boundary and recovery model
