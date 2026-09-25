@@ -11,6 +11,7 @@ Thank you for your interest in contributing to Xconfess - an anonymous confessio
 - [Development Workflow](#development-workflow)
 - [Code Style](#code-style)
 - [Testing Requirements](#testing-requirements)
+- [Accessibility Contributor Test Harness](#accessibility-contributor-test-harness)
 - [Validation Command Matrix](#validation-command-matrix)
 - [Pull Request Process](#pull-request-process)
 - [Wave / Drips Contribution Guidelines](#wave--drips-contribution-guidelines)
@@ -196,6 +197,71 @@ Run the full CI check locally before opening a PR:
     npm run ci
 
 All CI checks must pass before a PR will be reviewed.
+
+---
+
+## Accessibility Contributor Test Harness
+
+Contributors can run a consistent set of accessibility checks locally against the frontend routes. The harness is wired into the standard frontend validation commands, so a clean checkout can run it without extra setup beyond `npm install`.
+
+### What it covers
+
+- Automated axe-core rule checks against the frontend routes using the shared fixtures in `xconfess-frontend/tests/a11y/fixtures`.
+- A Playwright-driven browser pass that exercises the same routes in a real browser context.
+- Output that names both the route under test and the violated rule, so failures are triageable without re-running by hand.
+
+### Running the harness
+
+From the repository root, after `npm install`:
+
+    # Static + component-level accessibility checks
+    npm run frontend:lint
+    npm run frontend:test
+
+    # Browser-level accessibility checks
+    npm run frontend:test:e2e
+
+These are the same commands listed in the issue validation block, so a passing run here is the expected signal for a PR that touches frontend accessibility.
+
+### Browser setup
+
+- The browser pass uses Playwright. Install the browser binaries once per machine:
+
+      npx playwright install --with-deps chromium
+
+- If you are running in a container or CI image, use the `--with-deps` flag so system libraries are installed alongside the browser.
+- The harness targets Chromium by default. Other browsers can be added locally, but Chromium is the supported baseline for contributor runs.
+
+### Reading the output
+
+Each failure is reported with the route and the rule that failed, for example:
+
+    [a11y] route=/confessions rule=color-contrast
+    [a11y] route=/profile rule=label
+
+Use the route to locate the page and the rule name to look up the corresponding axe-core rule documentation before making changes.
+
+### Known limitations
+
+- Automated checks cannot verify screen reader announcements, focus order intent, or the quality of alt text. These still require manual review.
+- Dynamic content that only appears after user interaction may not be exercised by the default fixtures.
+- Third-party embeds and iframes are excluded from the automated pass.
+
+### When manual testing is required
+
+Run a manual pass, in addition to the harness, whenever a change touches:
+
+- Keyboard navigation, focus management, or modal/dialog behavior.
+- Form validation messaging or error announcements.
+- Color, contrast, or theming tokens.
+- Any interactive flow that the fixtures do not cover.
+
+### Failure triage
+
+1. Re-run the failing command with the route filter to confirm the failure is reproducible.
+2. Check whether the rule is a genuine violation or a fixture gap; if the fixture is missing state, extend it rather than suppressing the rule.
+3. Fix the underlying markup or styling. Do not disable rules globally to make the harness pass.
+4. If a rule cannot be satisfied for a documented reason, note the exception in the PR description with the route and rule name.
 
 ---
 
