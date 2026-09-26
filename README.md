@@ -370,5 +370,5 @@ When adding a new API endpoint, follow the [API endpoint contributor checklist](
 
 ## Handsoff notes
 
-<!-- handsoff-issue-35 -->
-- #35: [Advanced] Add a cohesive error boundary and recovery model
+<!-- handsoff-issue-24 -->
+- #24: [Advanced] Add device and session management UI
