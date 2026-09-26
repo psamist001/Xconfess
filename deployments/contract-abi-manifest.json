@@ -1,12 +1,27 @@
 {
-  "manifest_version": "1.0",
+  "manifest_version": "2.0",
   "generated_at_utc": "2026-07-23T00:00:00Z",
-  "description": "Expected ABI/event compatibility manifest for Xconfess contracts. Update this alongside MAJOR version bumps.",
+  "description": "Expected ABI/event compatibility manifest for Xconfess contracts. Update this alongside MAJOR version bumps. Each contract entry carries cryptographic checksums for its WASM and ABI artifacts, network/environment metadata, and signer provenance so consumers can reject tampered or incompatible deployments.",
+  "network": {
+    "network_id": "testnet",
+    "network_passphrase": "Test SDF Network ; September 2015",
+    "environment": "staging"
+  },
+  "signer": {
+    "identity": "xconfess-deployer",
+    "public_key": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+    "algorithm": "ed25519",
+    "signature": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "checksum_algorithm": "sha256",
   "contracts": {
     "confession-anchor": {
       "version": "0.1.0",
       "event_schema_version": 1,
       "error_registry_version": 1,
+      "contract_id": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+      "wasm_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "abi_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "functions": [
         "anchor_confession",
         "verify_confession",
