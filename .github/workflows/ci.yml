@@ -199,6 +199,82 @@ jobs:
             --passWithNoTests \
             --forceExit
 
+  frontend-budget:
+    name: Frontend / bundle & hydration budget
+    needs: [audit, secret-scan]
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_PUBLIC_API_URL: http://localhost:5000/api
+      NEXT_PUBLIC_WS_URL: ws://localhost:5000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_STELLAR_NETWORK: testnet
+      NEXT_PUBLIC_STELLAR_CONTRACT_ID: CBFR2MDZBQPTNBIJCT32MTDDQLW2AQNDWNO777F3QT6ANYKTHETQZWD3
+      NEXT_PUBLIC_DEV_BYPASS_AUTH: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm install --global npm@10.9.3
+      - run: npm ci --include=optional --no-audit --no-fund
+      - name: Build frontend with bundle analysis
+        run: npm run frontend:build
+        env:
+          ANALYZE: 'true'
+      - name: Enforce per-route bundle and hydration budgets
+        run: npm run frontend:budget
+      - name: Upload bundle analysis report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-bundle-report
+          path: |
+            .next/analyze/**
+            frontend-budget-report.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  accessibility:
+    name: Frontend / WCAG 2.2 AA gates
+    needs: [audit, secret-scan]
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_PUBLIC_API_URL: http://localhost:5000/api
+      NEXT_PUBLIC_WS_URL: ws://localhost:5000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_STELLAR_NETWORK: testnet
+      NEXT_PUBLIC_STELLAR_CONTRACT_ID: CBFR2MDZBQPTNBIJCT32MTDDQLW2AQNDWNO777F3QT6ANYKTHETQZWD3
+      NEXT_PUBLIC_DEV_BYPASS_AUTH: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm install --global npm@10.9.3
+      - run: npm ci --include=optional --no-audit --no-fund
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Run deterministic WCAG 2.2 AA acceptance gates
+        run: npm run frontend:test:a11y
+      - name: Upload accessibility gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-report
+          path: |
+            accessibility-report/**
+            playwright-report/**
+          if-no-files-found: ignore
+          retention-days: 7
+
   contracts:
     name: Contracts
     needs: [audit, secret-scan]
